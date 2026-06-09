@@ -1,5 +1,5 @@
 
-# 🚀 Adobe Commerce Payment Gateway Architecture Walkthrough [Mock Online Payment]
+## 🚀 Adobe Commerce Payment Gateway Architecture Walkthrough [Mock Online Payment]
 
 An architectural overview of the **Adobe Commerce Payment Gateway Framework**, detailing how Magento orchestrates decouple, single-responsibility classes via dependency injection (`di.xml`) to manage payment flows without complex PHP execution trees. It provides a comprehensive, step-by-step breakdown of the execution lifecycle and virtual type interactions triggered when a  a customer clicks **"Place Order"**.
 
