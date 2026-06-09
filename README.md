@@ -1,12 +1,41 @@
 
-## Mock Online Payment Walk through / Adobe Commerce Payment Gateway Architecture:
+# 🚀 Adobe Commerce Payment Gateway Architecture Walkthrough [Mock Online Payment]
 
 An architectural overview of the **Adobe Commerce Payment Gateway Framework**, detailing how Magento orchestrates decouple, single-responsibility classes via dependency injection (`di.xml`) to manage payment flows without complex PHP execution trees. It provides a comprehensive, step-by-step breakdown of the execution lifecycle and virtual type interactions triggered when a  a customer clicks **"Place Order"**.
 
-
 ---
+## 🧩 End-to-End Sequence Diagram
 
-### Step 1: Triggering the Command (The Facade Entry)
+```mermaid
+sequenceDiagram
+participant Customer
+participant Checkout
+participant Facade as MockOnlinePaymentFacade
+participant Pool as MockCommandPool
+participant Command as MockAuthorizeCommand
+participant Builder as MockAuthorizeRequestBuilder
+participant Transfer as MockTransferFactory
+participant Client as MockGatewayClient
+participant Handler as MockResponseHandler
+participant Order as Magento Order
+
+Customer->>Checkout: Click Place Order
+Checkout->>Facade: authorize()
+Facade->>Pool: get("authorize")
+Pool->>Command: execute()
+Command->>Builder: build()
+Builder-->>Command: Request Array
+Command->>Transfer: create()
+Transfer-->>Command: TransferInterface
+Command->>Client: placeRequest()
+Client-->>Command: Response Array
+Command->>Handler: handle()
+Handler->>Order: Update Payment State
+Order-->>Customer: Order Successfully Placed
+```
+
+
+###  💳 Step 1: Triggering the Command (The Facade Entry)
 
 The checkout pipeline initiates an authorization request. It calls the main entry point: **`MockOnlinePaymentFacade`** (which is a `Magento\Payment\Model\Method\Adapter`).
 
@@ -19,7 +48,7 @@ Checkout Execution ──> MockOnlinePaymentFacade ──> MockCommandPool ["aut
 
 ---
 
-### Step 2: Orchestration (`MockAuthorizeCommand`)
+### ⚡ Step 2: Orchestration (`MockAuthorizeCommand`)
 
 The Command Pool matches the `"authorize"` key and hands complete control over to **`MockAuthorizeCommand`** (an instance of `Magento\Payment\Gateway\Command\GatewayCommand`).
 
@@ -36,7 +65,7 @@ MockAuthorizeCommand
 
 ---
 
-### Step 3: Data Assembly (`MockAuthorizeRequestBuilder`)
+### 📝 Step 3: Data Assembly (`MockAuthorizeRequestBuilder`)
 
 The gateway command needs data to send to the payment server. It calls **`MockAuthorizeRequestBuilder`** (`RequestBuilder`).
 
@@ -46,7 +75,7 @@ The gateway command needs data to send to the payment server. It calls **`MockAu
 
 ---
 
-### Step 4: Protocol Packaging (`MockTransferFactory`)
+### 🔄 Step 4: Protocol Packaging (`MockTransferFactory`)
 
 The raw payload array from Step 3 is handed directly to **`MockTransferFactory`**.
 
@@ -55,17 +84,17 @@ The raw payload array from Step 3 is handed directly to **`MockTransferFactory`*
 
 ---
 
-### Step 5: Network Transmission (`MockGatewayClient`)
+### 🌐 Step 5: Network Transmission (`MockGatewayClient`)
 
 The structured transfer object is sent to **`MockGatewayClient`** (`SMG\MockOnlinePayment\Gateway\Http\MockGatewayClient`).
 
 * In a real-world integration, this layer makes an actual curl/HTTP request to an API endpoint (like Stripe or PayPal).
-* For this mock module, it skips external networks, simulates a successful gateway approval payload locally, and utilizes `VirtualLoggerHandler` to write the full API communication payload out to `/var/log/mock-payment-debug.log`.
+* For this mock module, it skips external networks, simulates a successful gateway approval payload locally, and utilizes `VirtualLoggerHandler` to write the full API communication payload out to 📝 `/var/log/mock-payment-debug.log`.
 * It returns the raw gateway response array back to the controller.
 
 ---
 
-### Step 6: Response Mutation (`MockResponseHandler`)
+### 🔍 Step 6: Response Mutation (`MockResponseHandler`)
 
 Finally, the raw response array is handed over to **`MockResponseHandler`** .
 
@@ -74,7 +103,7 @@ Finally, the raw response array is handed over to **`MockResponseHandler`** .
 
 ---
 
-### Summary Checklist of Data Evolution
+### 🧩 Summary Checklist of Data Evolution
 
 | Stage | Virtual Type Responsible | Input Object | Output Object |
 | --- | --- | --- | --- |
